@@ -3,6 +3,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 import pandas as pd
+import pickle
 import ta
 
 
@@ -55,10 +56,13 @@ def portfolio_data(portfolio, timeframe, start, end):
     return data
 
 data = portfolio_data(portfolio, TimeFrame.Day, "2026-01-01", "2026-06-11")
-print(data['VZ'])
 
+print(data['VZ'].shape)
 
+with open('dataframes.pkl', 'wb') as f:
+    pickle.dump(data, f)
 
+with open('dataframes.pkl', 'rb') as f:
+    loaded_dict = pickle.load(f)
 
-
-    
+print(loaded_dict['VZ'].shape)
