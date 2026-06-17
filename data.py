@@ -44,6 +44,22 @@ def get_tech_indicators(data):
     if data.empty:
         return data
     data = ta.add_all_ta_features(data, open="Open", high="High", low="Low", close="Close", volume="Volume", fillna=True)
+    
+    # Calculate 20-day Rolling Annualized Sharpe Ratio
+    # Daily risk-free rate (set to 0.05 by default, can be adjusted)
+    daily_risk_free_rate = 0.05/252
+    
+    # Calculate daily returns
+    daily_returns = data['Close'].pct_change()
+    
+    # Rolling 20-day metrics
+    rolling_return = daily_returns.rolling(window=20).mean()
+    rolling_volatility = daily_returns.rolling(window=20).std()
+    
+    # Sharpe Ratio = (Return - Risk Free) / Volatility
+    # Multiplied by sqrt(252) to annualize it, added 1e-9 to prevent division by zero
+    data['sharpe_ratio'] = (rolling_return - daily_risk_free_rate) / (rolling_volatility + 1e-9) * (252 ** 0.5)
+    
     return data
 
 def portfolio_data(portfolio, timeframe, start, end):
@@ -57,12 +73,5 @@ def portfolio_data(portfolio, timeframe, start, end):
 
 data = portfolio_data(portfolio, TimeFrame.Day, "2026-01-01", "2026-06-11")
 
-print(data['VZ'].shape)
-
-with open('dataframes.pkl', 'wb') as f:
+with open('stock_data_with_sharpe_ratio.pkl', 'wb') as f:
     pickle.dump(data, f)
-
-with open('dataframes.pkl', 'rb') as f:
-    loaded_dict = pickle.load(f)
-
-print(loaded_dict['VZ'].shape)
