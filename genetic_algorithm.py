@@ -68,10 +68,11 @@ def equal_weight_chromosome(n):
 
 
 def random_chromosome(n):
-    """Random valid integer allocation summing to 100."""
-    cuts = sorted(random.sample(range(1, 100), n - 1))
-    cuts = [0] + cuts + [100]
-    return [cuts[i + 1] - cuts[i] for i in range(n)]
+    """Random valid integer allocation summing to 100, zeros allowed."""
+    weights = [0] * n
+    for _ in range(100):
+        weights[random.randint(0, n - 1)] += 1
+    return weights
 
 
 # ── Initial Population ────────────────────────────────────────────────────────
@@ -103,12 +104,12 @@ def mutate(weights, mutation_rate):
     n = len(weights)
     for _ in range(n):
         if random.random() < mutation_rate:
-            donors = [i for i in range(n) if weights[i] > 1]
+            donors = [i for i in range(n) if weights[i] > 0]
             if len(donors) < 1:
                 continue
             i = random.choice(donors)
             j = random.choice([k for k in range(n) if k != i])
-            transfer = random.randint(1, weights[i] - 1)
+            transfer = random.randint(1, weights[i])
             weights[i] -= transfer
             weights[j] += transfer
     return weights
